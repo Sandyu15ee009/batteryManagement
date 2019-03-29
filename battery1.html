@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Battery Management System</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="index.css">
+<!-- Firebase App is always required and must be first -->
+<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-app.js"></script>
+
+<!-- Add additional services that you want to use -->
+<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-messaging.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-functions.js"></script>
+
+<!-- Comment out (or don't include) services that you don't want to use -->
+<!-- <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script> -->
+
+<script>
+
+function preloadFunc()
+    {
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCi5zsgzbY1p9ZQUWG_ae4t4imDCu1830w",
+    authDomain: "bms-iot-d5ba6.firebaseapp.com",
+    databaseURL: "https://bms-iot-d5ba6.firebaseio.com",
+    projectId: "bms-iot-d5ba6",
+    storageBucket: "bms-iot-d5ba6.appspot.com",
+    messagingSenderId: "1009708596069"
+  };
+  	firebase.initializeApp(config);
+
+  // Get a reference to the database service
+	var ref = firebase.database().ref();
+
+	ref.on("value", function(snapshot) {
+
+	// Current
+   console.log(snapshot.val().Battery_1.Current);
+
+	$('#current').html(snapshot.val().Battery_1.Current + ' Amp');
+
+	// Voltage
+	console.log(snapshot.val().Battery_1.Voltage);
+	$('#volt').html(snapshot.val().Battery_1.Voltage + ' V');
+
+	var current = snapshot.val().Battery_1.Current;
+	var voltage = snapshot.val().Battery_1.Voltage;
+	var power = current * voltage;
+
+	$('#pwr').html(power);
+	
+
+
+	// Temperature
+	console.log(snapshot.val().Battery_1.Temperature);
+	$('#temp').html(snapshot.val().Battery_1.Temperature + ' Degree');
+
+	// Ext Time
+	// console.log(snapshot.val().Battery_1.Current);
+	// $('#extime').html(snapshot.val().Battery_1.Expected Time of Charging (hrs) + ' Hrs');
+
+
+	// Progress Bar Thing
+	console.log(snapshot.val().Battery_1.SOC);
+	$("#progressController").val(snapshot.val().Battery_1.SOC);
+
+
+
+	$(document).ready(function(){
+
+			var $pc = $('#progressController');
+			var $pCaption = $('.progress-bar p');
+			var iProgress = document.getElementById('inactiveProgress');
+			var aProgress = document.getElementById('activeProgress');
+			var iProgressCTX = iProgress.getContext('2d');
+
+			
+			drawInactive(iProgressCTX);
+			
+			$pc.on('change', function(){
+				var percentage = $(this).val() / 100;
+				drawProgress(aProgress, percentage, $pCaption);
+			});
+
+			function drawInactive(iProgressCTX){
+				iProgressCTX.lineCap = 'square';
+
+				//outer ring
+				iProgressCTX.beginPath();
+				iProgressCTX.lineWidth = 15;
+				iProgressCTX.strokeStyle = '#e1e1e1';
+				iProgressCTX.arc(137.5,137.5,129,0,2*Math.PI);
+				iProgressCTX.stroke();
+
+				//progress bar
+				iProgressCTX.beginPath();
+				iProgressCTX.lineWidth = 0;
+				iProgressCTX.fillStyle = '#e6e6e6';
+				iProgressCTX.arc(137.5,137.5,121,0,2*Math.PI);
+				iProgressCTX.fill();
+
+				//progressbar caption
+				iProgressCTX.beginPath();
+				iProgressCTX.lineWidth = 0;
+				iProgressCTX.fillStyle = '#fff';
+				iProgressCTX.arc(137.5,137.5,100,0,2*Math.PI);
+				iProgressCTX.fill();
+
+			}
+			function drawProgress(bar, percentage, $pCaption){
+				var barCTX = bar.getContext("2d");
+				var quarterTurn = Math.PI / 2;
+				var endingAngle = ((2*percentage) * Math.PI) - quarterTurn;
+				var startingAngle = 0 - quarterTurn;
+
+				bar.width = bar.width;
+				barCTX.lineCap = 'square';
+
+				barCTX.beginPath();
+				barCTX.lineWidth = 20;
+				barCTX.strokeStyle = '#00B4FF';
+				barCTX.arc(137.5,137.5,111,startingAngle, endingAngle);
+				barCTX.stroke();
+
+				$pCaption.text( (parseInt(percentage * 100, 10)) + '%');
+			}
+
+				var percentage = $pc.val() / 100;
+				drawProgress(aProgress, percentage, $pCaption);
+
+			
+		});
+
+
+}, function (error) {
+   console.log("Error: " + error.code);
+});
+
+    }
+
+    window.onpaint = preloadFunc();
+
+</script>
+<script type="text/javascript" src="index.js"></script>
+
+</head>
+<body>
+
+	<h1>
+		Battery Management System
+	</h1>
+		<div id="page" class="page">
+		  <div class="progress-bar">
+			  <canvas id="inactiveProgress" class="progress-inactive" height="275px" width="275px"></canvas>
+		    <canvas id="activeProgress" class="progress-active"  height="275px" width="275px"></canvas>
+		    <p>50%</p>
+		  </div>
+		  <div id="progressControllerContainer">
+		    <input type="hidden" id="progressController" min="0" max="100" value="0" />
+		  </div
+		  <br>
+		  <div>
+		  	<p id="pwr" style="font-size: 2em; position: relative" value="86.4" >86.4</p>
+		  	<p style="font-size: 2em; position: relative" >KWh</p>
+		  </div>
+		</div>
+<br>
+<br>
+<div style="position: relative; width: 100%">
+	<div style="position: absolute; width: 30%; padding-right: 90%; padding-left: 10%">
+		<h2>Expeced Time to Full Charge</h2>
+		<div id="extime" style="font-size: 1.5em" value="12">12 Hr</div>	
+	</div>
+	<div style="position: absolute; width: 40%; padding-right: 90%; padding-left: 40%;">
+		<h2>Temperature (Degree)</h2>
+		<div id="temp" style="font-size: 1.5em" value="78">78</div>	
+	</div>
+	<div style="position: absolute; padding-right: 20%; padding-left: 65%;">
+		<h2>Voltage</h2>
+		<div id="volt" style="font-size: 1.5em" value="400">400</div>	
+	</div>
+	<div style="position: absolute; padding-right: 10%; padding-left: 85%;">
+		<h2>Current</h2>
+		<div id="current" style="font-size: 1.5em" value="2">200</div>	
+	</div>
+</div>
+
+</body>
+</html>
