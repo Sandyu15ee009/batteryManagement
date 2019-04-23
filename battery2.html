@@ -66,6 +66,10 @@ function preloadFunc()
 	// Progress Bar Thing
 	console.log(snapshot.val().Battery_2.SOC);
 	$("#progressController").val(snapshot.val().Battery_2.SOC);
+		
+	
+	console.log(snapshot.val().Battery_2.SOH);
+	$("#soh").html(snapshot.val().Battery_2.SOH);
 
 
 
@@ -177,6 +181,10 @@ function preloadFunc()
 	<div style="position: absolute; padding-right: 20%; padding-left: 65%;">
 		<h2>Voltage</h2>
 		<div id="volt" style="font-size: 1.5em" value="400">400</div>	
+	</div>
+	<div style="position: absolute; padding-right: 20%; padding-left: 65%;">
+		<h2>SOH</h2>
+		<div id="soh" style="font-size: 1.5em" value="400">400</div>	
 	</div>
 </div>
 
